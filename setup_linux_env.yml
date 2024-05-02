@@ -1,0 +1,34 @@
+name: livelattice
+
+channels:
+  - conda-forge
+  - rapidsai
+  - defaults
+  
+dependencies:
+  - rmm
+  - dask=2023.1.1
+  - dask-core=2023.1.1
+  - dask-cuda=23.2.1
+  - dask-image=2022.9.0
+  - numpy
+  - pandas
+  - pip
+  - pycudadecon
+  - pyqt=5.15.7
+  - pyqt5-sip=12.11.0
+  - pynvml
+  - python=3.10.9
+  - scikit-image
+  - scipy
+  - tqdm
+  - notebook
+  - ipywidgets
+  - napari
+
+    
+  - pip:
+      - cucim==22.10.0
+      - cupy-cuda11x==11.3.0
+      - matplotlib==3.6.1
+      - tifffile==2022.10.10
