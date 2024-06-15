@@ -73,8 +73,6 @@ def process_image(image, source, target, psf_path, wavelength, camera_id, save_m
     if skewed_decon:
         
         # Deconvolution
-        processing = np.pad(processing, 6, 'constant')
-
         if do_decon:
             t1 = time.time()
 
@@ -213,8 +211,6 @@ def process_image(image, source, target, psf_path, wavelength, camera_id, save_m
             print('\nDeskew and rotation takes', t2-t1, 'seconds!')
             
         # Deconvolution
-        processing = np.pad(processing, 6, 'constant')
-
         if do_decon:
             t1 = time.time()
 
