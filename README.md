@@ -6,7 +6,7 @@ LiveLattice is conceived by Hiroyuki Hakozaki (hhakozaki@health.ucsd.edu) and Zi
 It uses cudaDecon for deconvolution (optional), and Napari for interactive visualization.  
 
 # Installation
-Clone this [repository](https://github.com/pylattice/LiveLattice).
+Clone this [repository](https://github.com/pylattice/livelattice).
 
 ### Python dependencies
 Currently, LiveLattice has only been tested on Linux.
@@ -49,9 +49,9 @@ Experiment Name
 Specify the number of folders you want to process in `number_of_folders`.  
 After running the block, a window will pop up for you to select the date. Make sure click “Choose”. Double click will enter the folder instead.
 If you need to process more than one date, more windows will pop up as needed. All data subfolders will be automatically detected and display. Check if they are correct.  
-In cases where the automatic determination of wavelength failed, input the wavelength manually in the order of file name sorting. For example, `specified_channels=['488', '642']` can be used if the first channel is 488nm and second 642 nm.  
-In cases where you want to manually specify the PSF files instead of automatic detection based on the wavelength, spcify the path to each file as a list in `selected_psf_path`.  
-**Currently, we only support automatic detection using the setting files and file naming convention same as our lattice lightsheet microscope.**  
+In cases where the automatic determination of wavelength failed, input the wavelength manually in the order of file name sorting. For example, `specified_channels=['488', '642']` can be used if the first channel is 488nm and second channel is 642nm.  
+In cases where you want to manually specify the sample-scan PSF files instead of automatic detection based on the wavelength, spcify the path to each file as a list in `selected_psf_path`.  
+**Currently, we only support automatic detection using the setting files and file naming conventions for MOSAIC lattice lightsheet microscope.**  
 
 #### 2. Set parameters and process the movies
 `folders_to_process`: the folders selected from the list displayed in Step 2. Use 'None' for all folders. Otherwise input a list of index numbers (int) for the selected folders. Index starts at 0.  
@@ -61,7 +61,6 @@ In cases where you want to manually specify the PSF files instead of automatic d
 Note: when resume a previous run, bleach correction will be performed using the first frame files under bleach_correct folder in order to speed things up. Make sure this is the correct file for current folder.  
 `use_dask`: whether to use dask for pre-processing. Only needed for dataset/hardware where memory overflow is encountered.  
 `num_decon_it`: number of iterations in richardson-lucy deconvolution  
-`skewed_decon`: if True, deconvolution is performed on the raw data using sample scan PSF; if False, deconvolution is performed on the deskewed and rotated data using detective objective PSF.  
 `decon_zsection_size`: For larger dataset, deconvolution is performed on overlapping z-sections consecutively. Depending on the data size and whether skewed deconvolution is used, you may need to adjust the size until the deconvolution can be performed in reasonable time.  
 `decon_deskew_rotate`: perform all three operations. This is the usual case.  
 `no_decon`: only perform deskew and rotate. This can be used for visualization where deconvolution is not required.  
