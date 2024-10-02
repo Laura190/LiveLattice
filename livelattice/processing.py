@@ -24,9 +24,9 @@ def process_image(image, source, target, psf_path, wavelength, camera_id, save_m
 
     # background subtraction
     image_bg = get_image_background(source, camera_id)
-    image_nobg = image.astype('float32') - image_bg.astype('float32')
+    image_nobg = image.astype('int32') - image_bg.astype('int32')
     image_nobg[image_nobg < 0] = 0
-    image_nobg.astype('uint16')
+    image_nobg = image_nobg.astype('uint16')
 
     # bleach correction
     if 'stack0000' in source:
@@ -66,7 +66,7 @@ def process_image(image, source, target, psf_path, wavelength, camera_id, save_m
 
         mean_psf_bg = np.mean(np.concatenate((psf_img[:10], psf_img[-10:])), axis=0)[np.newaxis]
         
-        psf_img_nobg = psf_img.astype('float32') - mean_psf_bg.astype('float32') # subtract averaged background    
+        psf_img_nobg = psf_img.astype('int32') - mean_psf_bg.astype('int32') # subtract averaged background    
         
         psf_img_nobg[psf_img_nobg < 0] = 0
         psf_img_nobg = psf_img_nobg.astype('uint16')
