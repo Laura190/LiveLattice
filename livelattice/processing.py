@@ -24,23 +24,30 @@ def process_image(image, source, target, psf_path, wavelength, camera_id, save_m
 
     # background subtraction
     image_bg = get_image_background(source, camera_id)
-    image_nobg = image - image_bg
-    image_nobg[image_nobg >= 2**16-image_bg.max()] = 0
-    
+    image_nobg = image.astype('float32') - image_bg.astype('float32')
+    image_nobg[image_nobg < 0] = 0
+    image_nobg.astype('uint16')
+
     # bleach correction
     if 'stack0000' in source:
-        imwrite('./bleach_correct/ref_'+wavelength+'nm.tif', image_nobg)
+        keywords = source.split('/')
+        ref_path = keywords[8]+' '+keywords[9]+' '+keywords[10]
+        if not os.path.exists('./bleach_correct/'+ref_path):
+            os.mkdir('./bleach_correct/'+ref_path)
+        np.save('./bleach_correct/'+ref_path+'/'+'first_frame_'+wavelength+'nm.npy', np.mean(image_nobg).astype('float32'), allow_pickle=True)
         image_bleach_corrected = image_nobg
         
     else:
         t1 = time.time()
         
-        ref_nobg = imread('./bleach_correct/ref_'+wavelength+'nm.tif')
-        mean_current = np.mean(image_nobg[image_nobg>0])
-        mean_ref = np.mean(ref_nobg[ref_nobg>0])
-        bleach_factor =  mean_ref / mean_current
-        image_bleach_corrected = image_nobg * bleach_factor
-        print('\nMean intensity at first frame:', mean_ref)
+        keywords = source.split('/')
+        ref_path = keywords[8]+' '+keywords[9]+' '+keywords[10]
+        mean_first = np.load('./bleach_correct/'+ref_path+'/'+'first_frame_'+wavelength+'nm.npy').astype('float32')
+        mean_current = np.mean(image_nobg).astype('float32')
+        bleach_factor =  mean_first / mean_current
+        image_bleach_corrected = image_nobg * bleach_factor.astype('float32')
+        image_bleach_corrected = image_bleach_corrected.astype('uint16')
+        print('\nMean intensity at first frame:', mean_first)
         print('Mean intensity at current frame:', mean_current)
         print('Bleach factor:', bleach_factor)
     
@@ -57,12 +64,13 @@ def process_image(image, source, target, psf_path, wavelength, camera_id, save_m
     else:
         psf_img = imread(psf_path)
 
-        mean_psf_bg = np.mean(np.concatenate((psf_img[:5], psf_img[-5:])), axis=0)[np.newaxis]
+        mean_psf_bg = np.mean(np.concatenate((psf_img[:10], psf_img[-10:])), axis=0)[np.newaxis]
         
-        psf_img_nobg = psf_img.astype('uint16') - mean_psf_bg.astype('uint16') # subtract averaged background    
+        psf_img_nobg = psf_img.astype('float32') - mean_psf_bg.astype('float32') # subtract averaged background    
         
-        psf_img_nobg[psf_img_nobg >= 2**16-mean_psf_bg.max()] = 0
-    
+        psf_img_nobg[psf_img_nobg < 0] = 0
+        psf_img_nobg = psf_img_nobg.astype('uint16')
+        
         psf_nobg_path = psf_path[:-4]+'_clean.tif'
         imwrite(psf_nobg_path, psf_img_nobg)
 
@@ -91,7 +99,7 @@ def process_image(image, source, target, psf_path, wavelength, camera_id, save_m
                 break
                 
             print('\nDeconvolution starts for z-section', ind_z+1)
-            with TemporaryOTF(psf_nobg_path) as otf:
+            with TemporaryOTF(psf=psf_nobg_path, dzpsf=dzpsf, dxpsf=dxpsf, fixorigin=0, otf_bgrd=0, max_otf_size=None, skewed_decon=True) as otf:
                 with RLContext(section.shape, otf.path, dzdata, dxdata, dzpsf, dxpsf, skewed_decon=True) as ctx:
                 
                     section_deconv = rl_decon(section, background=0, n_iters=num_decon_it, skewed_decon=True)
