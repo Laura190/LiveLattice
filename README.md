@@ -76,3 +76,5 @@ Run this jupyter notebook on the folder to which the data to be aquired will be 
 ### MOSAIC_Live_Visualization_Napari.ipynb
 Run this jupyter notebook on the folder to which the data to be aquired will be saved. Any pre-processed data will be loaded into Napari and organized by channel/timepoint.  
 `use_dask_for_napari`: whether to use dask for loading the data into Napari. This is needed if the 4D dataset is larger than memory.
+
+
