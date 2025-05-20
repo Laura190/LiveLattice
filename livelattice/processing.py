@@ -7,7 +7,12 @@ from tqdm.notebook import trange, tqdm
 from tifffile import imread, imwrite
 from .helper_func import *
 import cupy
-import rmm
+try:
+    import rmm
+    _rmm_available = True
+except ImportError:
+    print("rmm not available")
+    _rmm_available = False
 import dask.array as da
 from pycudadecon import *
 from dask_image.ndinterp import affine_transform as affine_dask
@@ -123,8 +128,9 @@ def process_image(image, source, target, psf_path, wavelength, camera_id, save_m
         t1 = time.time()
 
         if use_dask:
-            rmm.reinitialize(managed_memory=True)
-            cupy.cuda.set_allocator(rmm.rmm_cupy_allocator)
+            if _rmm_available:
+                rmm.reinitialize(managed_memory=True)
+                cupy.cuda.set_allocator(rmm.rmm_cupy_allocator)
 
             processing = cupy.asarray(processing)
             processing = da.from_array(processing)
@@ -141,8 +147,9 @@ def process_image(image, source, target, psf_path, wavelength, camera_id, save_m
             processing = processing.compute()
 
         else:
-            rmm.reinitialize(managed_memory=True)
-            cupy.cuda.set_allocator(rmm.rmm_cupy_allocator)
+            if _rmm_available:
+                rmm.reinitialize(managed_memory=True)
+                cupy.cuda.set_allocator(rmm.rmm_cupy_allocator)
 
             processing = cupy.asarray(processing)
 
